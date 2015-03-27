@@ -1,19 +1,31 @@
 name: warren-charm
-summary: <Fill in summary here>
-maintainer: Madison Scott-Clary <makyo@corrin>
+summary: Warren is a networked content-sharing site.
+maintainer: Madison Scott-Clary <makyo@drab-makyo.com>
 description: |
-  <Multi-line description here>
+  Warren is a networked content-sharing site, allowing users to not only post
+  their creations, but link them together into a web of their works, and the
+  works of others.  It manages each post as an abstract entity and uses content
+  types to render those abstract types into something viewable within a
+  browser.
 tags:
-  # Replace "misc" with one or more whitelisted tags from this list:
-  # https://juju.ubuntu.com/docs/authors-charm-metadata.html#charm-metadata
-  - misc
+  - social
+  - cms
+  - applications
 subordinate: false
 provides:
-  provides-relation:
-    interface: interface-name
+  website:
+    interface: http
+  nrpe-external-master:
+    interface: nrpe-external-master
+    scope: container
+  local-monitors:
+    interface: local-monitors
+    scope: container
 requires:
-  requires-relation:
-    interface: interface-name
+  database:
+    interface: mongodb
+  elasticsearch:
+    interface: elasticsearch
 peers:
   peer-relation:
     interface: interface-name
