@@ -1,0 +1,23 @@
+# env-type sets martini.Env, and should be "development", "test", or
+# "production"
+env-type: "production"
+
+session-keys:
+    # auth-key should be 16 or 32 characters
+    auth-key: "{session_auth_key}"
+
+    # encryption-key should be 16, 32, or 64 characters
+    encryption-key: "{session_encryption_key}"
+
+# Mongo connection details
+mongo:
+    host: "{mongo_host}"
+    db: "{mongo_db}"
+
+# ElasticSearch connection details
+elasticsearch:
+    host: "{elasticsearch_host}"
+    port: {elasticsearch_port}
+
+smtp:
+    host: "{SMTP_host}"
