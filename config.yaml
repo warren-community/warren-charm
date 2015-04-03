@@ -15,3 +15,12 @@ options:
     default: warren
     description: The mongo database name
     type: string
+  listen_port:
+    default: 3000
+    description: The port to listen on
+    type: int
+  source:
+    default: "branch:master"
+    description: A string containing a "branch:", "tag:", or "commit:" followed
+      by a branch name, a tag name, or a commit, respectively
+    type: string
