@@ -1,1 +1,26 @@
-options: {}
+options:
+  smtp-server:
+    default: smtp.example.com
+    description: Address for the SMTP server for sending emails from Warren
+    type: string
+  session-auth-key:
+    default: CHANGEME--------
+    description: Session authentication key (16 or 32 bytes)
+    type: string
+  session-encryption-key:
+    default: CHANGEME--------
+    description: Session encryption key (16, 32, or 64 bytes)
+    type: string
+  mongo-db:
+    default: warren
+    description: The mongo database name
+    type: string
+  listen_port:
+    default: 3000
+    description: The port to listen on
+    type: int
+  source:
+    default: "branch:master"
+    description: A string containing a "branch:", "tag:", or "commit:" followed
+      by a branch name, a tag name, or a commit, respectively
+    type: string

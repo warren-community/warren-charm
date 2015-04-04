@@ -26,6 +26,3 @@ requires:
     interface: mongodb
   elasticsearch:
     interface: elasticsearch
-peers:
-  peer-relation:
-    interface: interface-name
