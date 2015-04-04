@@ -2,6 +2,9 @@
 # "production"
 env-type: "production"
 
+template-dir: "${template_dir}"
+static-dir: "${static_dir}"
+
 session-keys:
     # auth-key should be 16 or 32 characters
     auth-key: "${session_auth_key}"

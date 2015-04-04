@@ -27,6 +27,7 @@ relations = hookenv.relations()
 dependencies = ('git', 'golang-go', 'make', 'bzr')
 owner = 'warren'
 application = 'warren'
+package = 'github.com/warren-community/warren'
 unit_name = os.environ['JUJU_UNIT_NAME']
 service = unit_name[:unit_name.index('/')]
 system_service = '{}-{}'.format(application, service)
@@ -35,7 +36,7 @@ service_dir = '/srv/{}'.format(system_service)
 config_dir = '{}/etc'.format(service_dir)
 config_yaml = '{}/warren-config.yaml'.format(config_dir)
 install_dir = '{}/{}'.format(service_dir, application)
-package = 'github.com/warren-community/warren'
+package_dir = '{}/src/{}'.format(install_dir, package)
 
 def run(*popenargs, **kwargs):
     '''Run a command as a given user'''
@@ -104,7 +105,6 @@ def install_from_source():
     '''(Re)install the warren source and use the proper branch.'''
     log('installing warren from source')
     rmtree('{}/src'.format(install_dir), True)
-    package_dir = '{}/src/{}'.format(install_dir, package)
     os.environ['GOPATH'] = install_dir
     os.environ['PATH'] = '{}:{}'.format(
         os.path.join(install_dir, 'bin'),
@@ -143,6 +143,8 @@ def write_config_file():
     es_host = relation_param('elasticsearch', 'host')
     es_port = relation_param('elasticsearch', 'port', '9200')
     params = {
+        'template_dir': '{}/templates'.format(package_dir),
+        'static_dir': '{}/public'.format(package_dir),
         'session_auth_key': config['session-auth-key'],
         'session_encryption_key': config['session-encryption-key'],
         'mongo_host': '{}:{}'.format(mongo_host, mongo_port),
