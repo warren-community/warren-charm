@@ -5,11 +5,12 @@ import os
 import subprocess
 import sys
 
+from shutil import rmtree
 from string import Template
 
 # Charm helper bits
 charm_dir = os.environ['CHARM_DIR']
-sys.path.insert(0, os.path.join(CHARMDIR, 'lib'))
+sys.path.insert(0, os.path.join(charm_dir, 'lib'))
 
 from charmhelpers.core import (
     hookenv,
@@ -28,14 +29,12 @@ application = 'warren'
 unit_name = os.environ['JUJU_UNIT_NAME']
 service = unit_name[:unit_name.index('/')]
 system_service = '{}-{}'.format(application, service)
-upstart_conf = '/etc/init.d/{}.conf'.format(system-service)
+upstart_conf = '/etc/init.d/{}.conf'.format(system_service)
 service_dir = '/srv/{}'.format(system_service)
 config_dir = '{}/etc'.format(service_dir)
 config_yaml = '{}/config.yaml'.format(config_dir)
 install_dir = '{}/{}'.format(service_dir, application)
-archive = '{}/files/{}.tar.gz'.format(charm_dir, application)
 package = 'github.com/warren-charm/warren'
-lockdir = os.path.join(service_dir, 'run')
 
 # Utility functions
 def run(*popenargs, **kwargs):
@@ -80,15 +79,14 @@ def relation_param(relation, name, default=None):
     return default
 
 def install_from_source():
-    package_dir = '{}/src/{}'.format(MODE.installdir, MODE.package)
-    os.environ['GOPATH'] = MODE.installdir
+    rmtree('{}/src'.format(install_dir), True)
+    package_dir = '{}/src/{}'.format(install_dir, package)
+    os.environ['GOPATH'] = install_dir
     os.environ['PATH'] = '{}:{}'.format(
-        os.path.join(MODE.installdir, 'bin'),
+        os.path.join(install_dir, 'bin'),
         os.environ['PATH'])
-    if not os.path.exists(package_dir):
-        run(('go', 'get', MODE.package), user=owner)
+    run(('go', 'get', package), user=owner)
     run(('git', 'fetch', '--tags', 'origin'), cwd=package_dir, user=owner)
-
     source_type, source_name = config['source'].split(':')
     if source_type == 'branch':
         run(('git', 'checkout', branch), cwd=package_dir, user=owner)
@@ -108,7 +106,7 @@ def write_init_file():
     with open(os.path.join(charm_dir, 'templates', 'init.tmpl')) as r:
         tmpl = Template(r.read())
     host.write_file(
-        upstart_conf, tmpl.substitute({'dir': service_dir})
+        upstart_conf, tmpl.substitute({'dir': service_dir}))
 
 def write_config_file():
     mongo_host = relation_param(mongo_relation, 'hostname')
@@ -117,7 +115,7 @@ def write_config_file():
     params = {
         'session_auth_key': config['session-auth-key'],
         'session_encryption_key': config['session-encryption-key'],
-        'mongo_host': '{}:{}'.format(mongo_host, mongo_port)
+        'mongo_host': '{}:{}'.format(mongo_host, mongo_port),
         'mongo_db': config['mongo-db'],
         'elasticsearch_host': es_host,
         'elasticsearch_port': es_port,
@@ -131,6 +129,20 @@ def write_config_file():
         config_yaml, tmpl.substitute(params), owner=owner, group=owner)
     log('Wrote {}'.format(config_yaml))
     return (mongo_up, es_up)
+
+def manage_ports():
+    if config.changed(listen_port_key):
+        if config.previous(listen_port_key) is not None:
+            msg = "close-port {}".format(config.previous(listen_port_key))
+            print(msg)
+            log(msg)
+            hookenv.close_port(config.previous(listen_port_key))
+        listen_port = config[listen_port_key]
+        msg = "open-port {}".format(listen_port)
+        print(msg)
+        log(msg)
+        hookenv.open_port(listen_port)
+        update_website_relations()
 
 # Hooks
 @hooks.hook('install')
@@ -169,3 +181,6 @@ def main_hook():
     write_init_file()
     write_config_file()
     restart()
+
+if __name__ == '__main__':
+    pass
