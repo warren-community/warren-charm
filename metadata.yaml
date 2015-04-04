@@ -22,7 +22,7 @@ provides:
     interface: local-monitors
     scope: container
 requires:
-  database:
+  mongodb:
     interface: mongodb
   elasticsearch:
     interface: elasticsearch
