@@ -79,6 +79,7 @@ def relation_param(relation, name, default=None):
     return default
 
 def install_from_source():
+    log('installing warren from source')
     rmtree('{}/src'.format(install_dir), True)
     package_dir = '{}/src/{}'.format(install_dir, package)
     os.environ['GOPATH'] = install_dir
@@ -103,12 +104,14 @@ def install_from_source():
     run(('make', 'install'), cwd=package_dir, user=owner)
 
 def write_init_file():
+    log('writing upstart file')
     with open(os.path.join(charm_dir, 'templates', 'init.tmpl')) as r:
         tmpl = Template(r.read())
     host.write_file(
         upstart_conf, tmpl.substitute({'dir': service_dir}))
 
 def write_config_file():
+    log('writing config file')
     mongo_host = relation_param(mongo_relation, 'hostname')
     mongo_port = relation_param(mongo_relation, 'port')
     es_host, es_port = get_es_endpoint()
@@ -131,6 +134,7 @@ def write_config_file():
     return (mongo_up, es_up)
 
 def manage_ports():
+    log('checking ports')
     if config.changed(listen_port_key):
         if config.previous(listen_port_key) is not None:
             msg = "close-port {}".format(config.previous(listen_port_key))
@@ -180,6 +184,7 @@ def stop():
 def main_hook():
     write_init_file()
     write_config_file()
+    manage_hooks()
     restart()
 
 if __name__ == '__main__':
